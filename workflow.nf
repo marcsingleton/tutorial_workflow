@@ -9,10 +9,10 @@ process remove_pg {
     publishDir "$params.output_path/remove_pg/"
 
     input:
-        tuple path(input_path), val(genre), val(title)
+    tuple path(input_path), val(genre), val(title)
     
     output:
-        tuple path("$genre/${title}_clean.txt"), val(genre), val(title)
+    tuple path("$genre/${title}_clean.txt"), val(genre), val(title)
     
     script:
     """
@@ -27,7 +27,7 @@ process count_words {
     tuple path(input_path), val(genre), val(title)
 
     output:
-        tuple path("$genre/${title}_counts.tsv"), val(genre), val(title)
+    tuple path("$genre/${title}_counts.tsv"), val(genre), val(title)
     
     script:
     """
