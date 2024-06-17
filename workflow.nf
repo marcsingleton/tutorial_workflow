@@ -35,9 +35,25 @@ process count_words {
     """
 }
 
+process basic_stats {
+    publishDir "$params.output_path/basic_stats/"
+
+    input:
+    tuple path(input_path), val(genre), val(title)
+
+    output:
+    tuple path("$genre/${title}_stats.txt"), val(genre), val(title)
+
+    script:
+    """
+    python $params.code_path/basic_stats.py $input_path $genre/${title}_stats.txt
+    """
+}
+
 workflow {
     file_paths = channel.fromPath("$params.data_path/*/*.txt")
     file_records = file_paths.map({[it, it.parent.baseName, it.baseName]})
     clean_records = remove_pg(file_records)
     count_records = count_words(clean_records)
+    basic_stats = basic_stats(count_records)
 }
