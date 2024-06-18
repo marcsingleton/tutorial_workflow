@@ -50,10 +50,30 @@ process basic_stats {
     """
 }
 
+process transpose_stats {
+    publishDir "$params.output_path/aggregate_stats/"
+
+    input:
+    tuple path(input_path), val(genre), val(title)
+
+    output:
+    stdout
+
+    shell:
+    '''
+    text=$(awk 'BEGIN {FS=": "; OFS="\t"}{print $1,$2}' !{input_path})
+    printf "%s\t%s\t" genre title
+    echo "$text" | cut -f 1 | paste -s -
+    printf "%s\t%s\t" !{genre} !{title}
+    echo "$text" | cut -f 2 | paste -s -
+    '''
+}
+
 workflow {
     file_paths = channel.fromPath("$params.data_path/*/*.txt")
     file_records = file_paths.map({[it, it.parent.baseName, it.baseName]})
     clean_records = remove_pg(file_records)
     count_records = count_words(clean_records)
     basic_stats = basic_stats(count_records)
+    aggregated = transpose_stats(basic_stats).collectFile(name: 'aggregated.tsv', storeDir: projectDir, keepHeader: true, skip: 1)
 }
