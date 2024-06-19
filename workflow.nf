@@ -51,8 +51,6 @@ process basic_stats {
 }
 
 process transpose_stats {
-    publishDir "$params.output_path/aggregate_stats/"
-
     input:
     tuple path(input_path), val(genre), val(title)
 
@@ -74,6 +72,8 @@ workflow {
     file_records = file_paths.map({[it, it.parent.baseName, it.baseName]})
     clean_records = remove_pg(file_records)
     count_records = count_words(clean_records)
-    basic_stats = basic_stats(count_records)
-    aggregated = transpose_stats(basic_stats).collectFile(name: 'aggregated.tsv', storeDir: projectDir, keepHeader: true, skip: 1)
+    basic_records = basic_stats(count_records)
+    aggregated = transpose_stats(basic_records)
+        .collectFile(name: "$params.output_path/basic_stats/stats.tsv",
+                     keepHeader: true, skip: 1, sort: true)
 }
