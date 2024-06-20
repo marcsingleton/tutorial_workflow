@@ -19,7 +19,6 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('input_path_1')
     parser.add_argument('input_path_2')
-    parser.add_argument('output_path')
     args = parser.parse_args()
 
     counts1 = read_counts(args.input_path_1)
