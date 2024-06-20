@@ -9,7 +9,7 @@ from string import punctuation
 
 
 def process_line(line):
-    words = re.split('[\s—]+', line)  # Whitespace and dashes
+    words = re.split('[\s]+|—|--', line)  # Whitespace, em dash, and double hyphens
     return words
 
 
