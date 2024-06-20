@@ -28,7 +28,6 @@ if __name__ == '__main__':
     df = pd.read_table(args.input_path)
     df['word_len'] = df['word'].apply(len)
 
-    output = []
     vocab_size = len(df)
     vocab_size_GT1 = (df['count'] > 1).sum()
     vocab_size_L90 = ((df['count'] / df['count'].sum()).cumsum() <= 0.06).sum() + 1  # Analogous to genome assembly statistic L50
@@ -46,23 +45,25 @@ if __name__ == '__main__':
     mean_word_length = (length_dist.index * length_dist).sum()
     var_word_length = (length_dist * (length_dist.index - mean_word_length) ** 2).sum()
 
-    output = dedent(f"""\
-    vocab_size: {vocab_size}
-    vocab_size_GT1: {vocab_size_GT1}
-    vocab_size_L90: {vocab_size_L90}
-    longest_word: {longest_word}
-    most_common_word: {most_common_word}
-    entropy: {entropy}
-    min_word_length: {min_word_length}
-    max_word_length: {max_word_length}
-    median_word_length: {median_word_length}
-    mean_word_length: {mean_word_length}
-    var_word_length: {var_word_length}
-    """)
+    output = [
+        ("vocab_size", vocab_size),
+        ("vocab_size_GT1", vocab_size_GT1),
+        ("vocab_size_L90", vocab_size_L90),
+        ("longest_word", longest_word),
+        ("most_common_word", most_common_word),
+        ("entropy", entropy),
+        ("min_word_length", min_word_length),
+        ("max_word_length", max_word_length),
+        ("median_word_length", median_word_length),
+        ("mean_word_length", mean_word_length),
+        ("var_word_length", var_word_length)
+        ]
 
     output_dir = os.path.dirname(args.output_path)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     with open(args.output_path, 'w') as file:
-        file.write(output)
+        header = '\t'.join([record[0] for record in output]) + '\n'
+        values = '\t'.join([str(record[1]) for record in output]) + '\n'
+        file.write(header + values)

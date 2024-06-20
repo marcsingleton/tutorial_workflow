@@ -42,29 +42,12 @@ process basic_stats {
     tuple path(input_path), val(genre), val(title)
 
     output:
-    tuple path("$genre/${title}_stats.txt"), val(genre), val(title)
+    tuple path("$genre/${title}_stats.tsv"), val(genre), val(title)
 
     script:
     """
-    python $params.code_path/basic_stats.py $input_path $genre/${title}_stats.txt
+    python $params.code_path/basic_stats.py $input_path $genre/${title}_stats.tsv
     """
-}
-
-process transpose_stats {
-    input:
-    tuple path(input_path), val(genre), val(title)
-
-    output:
-    stdout
-
-    shell:
-    '''
-    text=$(awk 'BEGIN {FS=": "; OFS="\t"}{print $1,$2}' !{input_path})
-    printf "%s\t%s\t" genre title
-    echo "$text" | cut -f 1 | paste -s -
-    printf "%s\t%s\t" !{genre} !{title}
-    echo "$text" | cut -f 2 | paste -s -
-    '''
 }
 
 workflow {
@@ -73,7 +56,8 @@ workflow {
     clean_records = remove_pg(file_records)
     count_records = count_words(clean_records)
     basic_records = basic_stats(count_records)
-    aggregated = transpose_stats(basic_records)
+    aggregated = basic_records
+        .map({it[0].text})
         .collectFile(name: "$params.output_path/basic_stats/stats.tsv",
                      keepHeader: true, skip: 1, sort: true)
 }
