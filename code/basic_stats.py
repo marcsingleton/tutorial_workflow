@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     vocab_size = len(df)
     vocab_size_GT1 = (df['count'] > 1).sum()
-    vocab_size_L90 = ((df['count'] / df['count'].sum()).cumsum() <= 0.06).sum() + 1  # Analogous to genome assembly statistic L50
+    vocab_size_L90 = ((df['count'] / df['count'].sum()).cumsum() <= 0.9).sum() + 1  # Analogous to genome assembly statistic L50
     longest_word = df.sort_values(['word_len', 'word'],
                                   ascending=[False, True],
                                   ignore_index=True).at[0, 'word']
