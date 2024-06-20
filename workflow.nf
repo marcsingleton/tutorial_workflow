@@ -50,14 +50,26 @@ process basic_stats {
     """
 }
 
+process paste_ids {
+    input:
+    tuple path(input_path), val(genre), val(title)
+
+    output:
+    stdout
+
+    shell:
+    '''
+    echo 'genre\ttitle\n!{genre}\t!{title}\n' | paste - !{input_path}
+    '''
+}
+
 workflow {
     file_paths = channel.fromPath("$params.data_path/*/*.txt")
     file_records = file_paths.map({[it, it.parent.baseName, it.baseName]})
     clean_records = remove_pg(file_records)
     count_records = count_words(clean_records)
     basic_records = basic_stats(count_records)
-    aggregated = basic_records
-        .map({it[0].text})
+    aggregated = paste_ids(basic_records)
         .collectFile(name: "$params.output_path/basic_stats/stats.tsv",
                      keepHeader: true, skip: 1, sort: true)
 }
