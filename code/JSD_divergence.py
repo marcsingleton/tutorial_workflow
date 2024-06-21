@@ -37,4 +37,4 @@ if __name__ == '__main__':
         JSD += p2 * log(p2 / p1)  # p2 as reference
     JSD /= 2
 
-    print(JSD)
+    print(JSD, end='')

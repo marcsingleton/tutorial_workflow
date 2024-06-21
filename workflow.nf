@@ -63,6 +63,26 @@ process paste_ids {
     '''
 }
 
+process jsd_divergence {
+    input:
+    tuple(
+        path(input_path_1, stageAs: "counts1.tsv"), val(genre_1), val(title_1),
+        path(input_path_2, stageAs: "counts2.tsv"), val(genre_2), val(title_2)
+    )
+
+    output:
+    tuple(
+        stdout,
+        val(genre_1), val(title_1),
+        val(genre_2), val(title_2)
+    )
+
+    script:
+    """
+    python $params.code_path/jsd_divergence.py $input_path_1 $input_path_2 
+    """
+}
+
 workflow {
     file_paths = channel.fromPath("$params.data_path/*/*.txt")
     file_records = file_paths.map({[it, it.parent.baseName, it.baseName]})
@@ -71,5 +91,11 @@ workflow {
     basic_records = basic_stats(count_records)
     aggregated = paste_ids(basic_records)
         .collectFile(name: "$params.output_path/basic_stats/stats.tsv",
+                     keepHeader: true, skip: 1, sort: true)
+    count_pairs = count_records.combine(count_records)
+        .unique({[it[2], it[5]].sort()})
+    jsd_records = jsd_divergence(count_pairs)
+        .map({"title_1\ttitle_2\tjsd\n${it[2]}\t${it[4]}\t${it.value}\n"})
+        .collectFile(name: "$params.output_path/jsd_divergence.tsv",
                      keepHeader: true, skip: 1, sort: true)
 }
