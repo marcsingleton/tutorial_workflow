@@ -6,7 +6,7 @@ params.data_path = "$projectDir/data/"
 params.code_path = "$projectDir/code/"
 
 process remove_pg {
-    publishDir "$params.output_path/remove_pg/"
+    publishDir "$params.output_path/"
 
     input:
     tuple path(input_path), val(genre), val(title)
@@ -21,7 +21,7 @@ process remove_pg {
 }
 
 process count_words {
-    publishDir "$params.output_path/count_words/"
+    publishDir "$params.output_path/"
 
     input:
     tuple path(input_path), val(genre), val(title)
@@ -36,7 +36,7 @@ process count_words {
 }
 
 process basic_stats {
-    publishDir "$params.output_path/basic_stats/"
+    publishDir "$params.output_path/"
 
     input:
     tuple path(input_path), val(genre), val(title)
@@ -89,8 +89,8 @@ workflow {
     clean_records = remove_pg(file_records)
     count_records = count_words(clean_records)
     basic_records = basic_stats(count_records)
-    aggregated = paste_ids(basic_records)
-        .collectFile(name: "$params.output_path/basic_stats/stats.tsv",
+    paste_ids(basic_records)
+        .collectFile(name: "$params.output_path/basic_stats.tsv",
                      keepHeader: true, skip: 1, sort: true)
     count_pairs = count_records.combine(count_records)
         .unique({[it[2], it[5]].sort()})
