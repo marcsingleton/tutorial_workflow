@@ -59,7 +59,7 @@ process paste_ids {
 
     shell:
     '''
-    echo 'genre\ttitle\n!{genre}\t!{title}\n' | paste - !{input_path}
+    echo -n 'genre\ttitle\n!{genre}\t!{title}\n' | paste - !{input_path}
     '''
 }
 
@@ -92,10 +92,12 @@ workflow {
     paste_ids(basic_records)
         .collectFile(name: "$params.output_path/basic_stats.tsv",
                      keepHeader: true, skip: 1, sort: true)
-    count_pairs = count_records.combine(count_records)
+    count_pairs = count_records
+        .combine(count_records)
         .unique({[it[2], it[5]].sort()})
     jsd_records = jsd_divergence(count_pairs)
-        .map({"title_1\ttitle_2\tjsd\n${it[2]}\t${it[4]}\t${it.value}\n"})
+    jsd_records
+        .map({"genre1\ttitle_1\tgenre_2\ttitle_2\tjsd\n${it[1]}\t${it[2]}\t${it[3]}\t${it[4]}\t${it[0]}\n"})
         .collectFile(name: "$params.output_path/jsd_divergence.tsv",
                      keepHeader: true, skip: 1, sort: true)
 }
