@@ -95,19 +95,22 @@ workflow {
     count_pairs = count_records
         .combine(count_records)
         .map({
-            meta1 = it[0]
-            meta2 = it[2]
-            meta = 
-                [
-                title1: meta1.title, genre1: meta1.genre,
-                title2: meta2.title, genre2: meta2.genre
-                ]
+            meta1 = it[0].collectEntries((key, value) -> [key + '1', value])
+            meta2 = it[2].collectEntries((key, value) -> [key + '2', value])
+            meta = meta1 + meta2
             tuple(meta, it[1], it[3])
             })
         .unique({[it[0].title1, it[0].title2].sort()})
     jsd_records = jsd_divergence(count_pairs)
     jsd_records
-        .map({"genre1\ttitle_1\tgenre_2\ttitle_2\tjsd\n${it[0].genre1}\t${it[0].title1}\t${it[0].genre2}\t${it[0].title2}\t${it[1]}\n"})
+        .map({
+            record = it[0].clone()  // Copy meta object to not modify
+            record['jsd'] = it[1]
+            keys = ['genre1', 'title1', 'genre2', 'title2', 'jsd']
+            header = keys.join('\t') + '\n'
+            values = keys.collect({record[it]}).join('\t') + '\n'
+            header + values
+            })
         .collectFile(name: "$params.output_path/jsd_divergence.tsv",
                      keepHeader: true, skip: 1, sort: true)
 }
