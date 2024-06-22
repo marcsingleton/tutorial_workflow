@@ -9,14 +9,14 @@ process remove_pg {
     publishDir "$params.output_path/"
 
     input:
-    tuple path(input_path), val(genre), val(title)
+    tuple val(meta), val(input_path)
     
     output:
-    tuple path("$genre/${title}_clean.txt"), val(genre), val(title)
+    tuple val(meta), path("${meta.genre}/${meta.title}_clean.txt")
     
     script:
     """
-    python $params.code_path/remove_pg.py $input_path $genre/${title}_clean.txt
+    python $params.code_path/remove_pg.py $input_path ${meta.genre}/${meta.title}_clean.txt
     """
 }
 
@@ -24,14 +24,14 @@ process count_words {
     publishDir "$params.output_path/"
 
     input:
-    tuple path(input_path), val(genre), val(title)
+    tuple val(meta), path(input_path)
 
     output:
-    tuple path("$genre/${title}_counts.tsv"), val(genre), val(title)
+    tuple val(meta), path("${meta.genre}/${meta.title}_counts.tsv")
     
     script:
     """
-    python $params.code_path/count_words.py $input_path $genre/${title}_counts.tsv
+    python $params.code_path/count_words.py $input_path ${meta.genre}/${meta.title}_counts.tsv
     """
 }
 
@@ -39,42 +39,42 @@ process basic_stats {
     publishDir "$params.output_path/"
 
     input:
-    tuple path(input_path), val(genre), val(title)
+    tuple val(meta), path(input_path)
 
     output:
-    tuple path("$genre/${title}_stats.tsv"), val(genre), val(title)
+    tuple val(meta), path("${meta.genre}/${meta.title}_stats.tsv")
 
     script:
     """
-    python $params.code_path/basic_stats.py $input_path $genre/${title}_stats.tsv
+    python $params.code_path/basic_stats.py $input_path ${meta.genre}/${meta.title}_stats.tsv
     """
 }
 
 process paste_ids {
     input:
-    tuple path(input_path), val(genre), val(title)
+    tuple val(meta), path(input_path)
 
     output:
     stdout
 
     shell:
     '''
-    echo -n 'genre\ttitle\n!{genre}\t!{title}\n' | paste - !{input_path}
+    echo -n 'genre\ttitle\n!{meta.genre}\t!{meta.title}\n' | paste - !{input_path}
     '''
 }
 
 process jsd_divergence {
     input:
     tuple(
-        path(input_path_1, stageAs: "counts1.tsv"), val(genre_1), val(title_1),
-        path(input_path_2, stageAs: "counts2.tsv"), val(genre_2), val(title_2)
+        val(meta),
+        path(input_path_1, stageAs: "counts1.tsv"),
+        path(input_path_2, stageAs: "counts2.tsv")
     )
 
     output:
     tuple(
-        stdout,
-        val(genre_1), val(title_1),
-        val(genre_2), val(title_2)
+        val(meta),
+        stdout
     )
 
     script:
@@ -85,7 +85,7 @@ process jsd_divergence {
 
 workflow {
     file_paths = channel.fromPath("$params.data_path/*/*.txt")
-    file_records = file_paths.map({[it, it.parent.baseName, it.baseName]})
+    file_records = file_paths.map({tuple([title: it.baseName, genre: it.parent.baseName], it)})
     clean_records = remove_pg(file_records)
     count_records = count_words(clean_records)
     basic_records = basic_stats(count_records)
@@ -94,10 +94,20 @@ workflow {
                      keepHeader: true, skip: 1, sort: true)
     count_pairs = count_records
         .combine(count_records)
-        .unique({[it[2], it[5]].sort()})
+        .map({
+            meta1 = it[0]
+            meta2 = it[2]
+            meta = 
+                [
+                title1: meta1.title, genre1: meta1.genre,
+                title2: meta2.title, genre2: meta2.genre
+                ]
+            tuple(meta, it[1], it[3])
+            })
+        .unique({[it[0].title1, it[0].title2].sort()})
     jsd_records = jsd_divergence(count_pairs)
     jsd_records
-        .map({"genre1\ttitle_1\tgenre_2\ttitle_2\tjsd\n${it[1]}\t${it[2]}\t${it[3]}\t${it[4]}\t${it[0]}\n"})
+        .map({"genre1\ttitle_1\tgenre_2\ttitle_2\tjsd\n${it[0].genre1}\t${it[0].title1}\t${it[0].genre2}\t${it[0].title2}\t${it[1]}\n"})
         .collectFile(name: "$params.output_path/jsd_divergence.tsv",
                      keepHeader: true, skip: 1, sort: true)
 }
