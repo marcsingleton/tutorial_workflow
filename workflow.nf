@@ -94,7 +94,7 @@ process group_jsd_stats {
 
     script:
     """
-    python $params.code_path/group_stats.py $input_path ./grouped_jsd.txt
+    python $params.code_path/group_jsd_stats.py $input_path ./grouped_jsd.txt
     """
 
 }
