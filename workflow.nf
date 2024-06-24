@@ -100,14 +100,21 @@ process group_jsd_stats {
 }
 
 workflow {
+    // Find paths to data and convert into tuples with metadata
     file_paths = channel.fromPath("$params.data_path/*/*.txt")
     file_records = file_paths.map({tuple([title: it.baseName, genre: it.parent.baseName], it)})
+    
+    // Remove header and footer and count words
     clean_records = remove_pg(file_records)
     count_records = count_words(clean_records)
+    
+    // Calculate basic stats of counts
     basic_records = basic_stats(count_records)
     basic_merged = paste_ids(basic_records)
         .collectFile(name: "$params.output_path/basic_stats.tsv",
                      keepHeader: true, skip: 1, sort: true)
+    
+    // Calculate pairwise similarity measure and aggregate stats
     count_pairs = count_records
         .combine(count_records)
         .map({
