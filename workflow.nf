@@ -105,7 +105,7 @@ workflow {
     clean_records = remove_pg(file_records)
     count_records = count_words(clean_records)
     basic_records = basic_stats(count_records)
-    paste_ids(basic_records)
+    basic_merged = paste_ids(basic_records)
         .collectFile(name: "$params.output_path/basic_stats.tsv",
                      keepHeader: true, skip: 1, sort: true)
     count_pairs = count_records
