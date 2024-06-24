@@ -59,7 +59,7 @@ if __name__ == '__main__':
         ]
 
     output_dir = os.path.dirname(args.output_path)
-    if not os.path.exists(output_dir):
+    if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     with open(args.output_path, 'w') as file:
