@@ -83,6 +83,22 @@ process jsd_divergence {
     """
 }
 
+process group_jsd_stats {
+    publishDir "$params.output_path/"
+
+    input:
+    path input_path
+
+    output:
+    path "grouped_jsd.txt"
+
+    script:
+    """
+    python $params.code_path/group_stats.py $input_path ./grouped_jsd.txt
+    """
+
+}
+
 workflow {
     file_paths = channel.fromPath("$params.data_path/*/*.txt")
     file_records = file_paths.map({tuple([title: it.baseName, genre: it.parent.baseName], it)})
@@ -102,7 +118,7 @@ workflow {
             })
         .unique({[it[0].title1, it[0].title2].sort()})
     jsd_records = jsd_divergence(count_pairs)
-    jsd_records
+    jsd_merged = jsd_records
         .map({
             record = it[0].clone()  // Copy meta object to not modify
             record['jsd'] = it[1]
@@ -113,4 +129,5 @@ workflow {
             })
         .collectFile(name: "$params.output_path/jsd_divergence.tsv",
                      keepHeader: true, skip: 1, sort: true)
+    group_jsd_records = group_jsd_stats(jsd_merged)
 }
