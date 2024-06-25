@@ -1,6 +1,11 @@
+# Nextflow internal folders
 .nextflow/
 work/
 .nextflow.log*
 
+# Snakemake internal folders
+.snakemake/
+
 data/
 results_nf/
+results_smk/
