@@ -1,9 +1,23 @@
 """Snakemake pipeline for book text analysis."""
 
+import os
+from collections import namedtuple
+from glob import glob
+
 # Paths
 output_path = 'results_smk'
 data_path = 'data'
 code_path = 'code'
+
+# Collect metadata
+MetaRecord = namedtuple('MetaRecord', ['genre', 'title'])
+
+META = []
+for path in glob(f'{data_path}/*/*.txt'):
+    head, tail = os.path.split(path)
+    title = os.path.splitext(tail)[0]
+    genre = os.path.basename(head)
+    META.append(MetaRecord(genre, title))
 
 rule remove_pg:
     input:
@@ -43,7 +57,7 @@ rule basic_stats:
 
 rule merge_basic_stats:
     input:
-        rules.basic_stats.output
+        expand(f'{output_path}/' + '{meta.genre}/{meta.title}_stats.tsv', meta=META)
     
     output:
         f'{output_path}/basic_stats.tsv'
@@ -53,5 +67,5 @@ rule merge_basic_stats:
         for file in {{input}}
         do
             echo $file
-        done
+        done >> {output_path}/basic_stats.tsv
         '''
