@@ -1,8 +1,6 @@
 """Snakemake pipeline for book text analysis."""
 
 import os
-from collections import namedtuple
-from glob import glob
 
 # Paths
 output_path = 'results_smk'
@@ -10,7 +8,7 @@ data_path = 'data'
 code_path = 'code'
 
 # Collect metadata
-genres, titles = glob_wildcards(f'{data_path}/{{genre}}/{{title}}.txt')
+GENRES, TITLES = glob_wildcards(f'{data_path}/{{genre}}/{{title}}.txt')
 
 rule remove_pg:
     input:
@@ -50,7 +48,7 @@ rule basic_stats:
 
 rule merge_basic_stats:
     input:
-        expand(rules.basic_stats.output, zip, genre=genres, title=titles)
+        collect(rules.basic_stats.output, zip, genre=GENRES, title=TITLES)
     
     output:
         f'{output_path}/basic_stats.tsv'
