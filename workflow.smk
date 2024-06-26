@@ -1,6 +1,7 @@
 """Snakemake pipeline for book text analysis."""
 
 import os
+from itertools import combinations_with_replacement
 
 # Paths
 output_path = 'results_smk'
@@ -9,6 +10,7 @@ code_path = 'code'
 
 # Collect metadata
 GENRES, TITLES = glob_wildcards(f'{data_path}/{{genre}}/{{title}}.txt')
+META = list(zip(GENRES, TITLES))
 
 rule remove_pg:
     input:
@@ -27,7 +29,7 @@ rule count_words:
         rules.remove_pg.output
     
     output:
-        f'{output_path}/{{genre}}/{{title}}_counts.txt'
+        f'{output_path}/{{genre}}/{{title}}_counts.tsv'
     
     shell:
         f'''
@@ -67,3 +69,43 @@ rule merge_basic_stats:
             tail -n +2 $file
         done | sort >> {output}
         '''
+
+rule jsd_divergence:
+    input:
+       file1 = rules.count_words.output[0].replace('genre', 'genre1').replace('title', 'title1'),
+       file2 = rules.count_words.output[0].replace('genre', 'genre2').replace('title', 'title2')
+
+    output:
+        temp(f'{output_path}/jsd_divergence/{{genre1}}|{{title1}}|{{genre2}}|{{title2}}.temp')
+    
+    shell:
+        f'''
+        python {code_path}/jsd_divergence.py {{input.file1}} {{input.file2}} > "{{output}}"
+        '''
+
+META1, META2 = zip(*combinations_with_replacement(META, 2))
+GENRES1, TITLES1 = zip(*META1)
+GENRES2, TITLES2 = zip(*META2)
+rule merge_jsd_divergence:
+    input:
+        expand(rules.jsd_divergence.output, zip, genre1=GENRES1, title1=TITLES1, genre2=GENRES2, title2=TITLES2)
+    
+    output:
+        f'{output_path}/jsd_divergence.tsv'
+
+    shell:
+        '''
+        read -a files <<< "{input}"
+        for file in "${{files[@]}}"
+        do
+            cat $file
+            echo
+        done > {output}
+        '''
+
+rule all:
+    default_target: True
+
+    input:
+        rules.merge_basic_stats.output,
+        rules.merge_jsd_divergence.output
