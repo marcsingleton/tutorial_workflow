@@ -48,7 +48,7 @@ rule basic_stats:
 
 rule merge_basic_stats:
     input:
-        collect(rules.basic_stats.output, zip, genre=GENRES, title=TITLES)
+        expand(rules.basic_stats.output, zip, genre=GENRES, title=TITLES)
     
     output:
         f'{output_path}/basic_stats.tsv'
