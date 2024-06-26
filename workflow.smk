@@ -57,15 +57,25 @@ rule basic_stats:
 
 rule merge_basic_stats:
     input:
-        expand(f'{output_path}/' + '{meta.genre}/{meta.title}_stats.tsv', meta=META)
+        expand(rules.basic_stats.output,
+            zip,
+            genre=[record.genre for record in META],
+            title=[record.title for record in META])
     
     output:
         f'{output_path}/basic_stats.tsv'
     
     shell:
-        f'''
-        for file in {{input}}
+        '''
+        read -a files <<< "{input}"
+        echo -n "genre\ttitle\t" > {output}
+        head -n 1 ${{files[0]}} >> {output}
+        for file in "${{files[@]}}"
         do
-            echo $file
-        done >> {output_path}/basic_stats.tsv
+            base=$(basename $file)
+            title=${{base%_stats.tsv}}
+            genre=$(basename $(dirname $file))
+            echo -n "$genre\t$title\t"
+            tail -n +2 $file
+        done | sort >> {output}
         '''
