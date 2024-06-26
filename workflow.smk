@@ -10,14 +10,7 @@ data_path = 'data'
 code_path = 'code'
 
 # Collect metadata
-MetaRecord = namedtuple('MetaRecord', ['genre', 'title'])
-
-META = []
-for path in glob(f'{data_path}/*/*.txt'):
-    head, tail = os.path.split(path)
-    title = os.path.splitext(tail)[0]
-    genre = os.path.basename(head)
-    META.append(MetaRecord(genre, title))
+genres, titles = glob_wildcards(f'{data_path}/{{genre}}/{{title}}.txt')
 
 rule remove_pg:
     input:
@@ -57,10 +50,7 @@ rule basic_stats:
 
 rule merge_basic_stats:
     input:
-        expand(rules.basic_stats.output,
-            zip,
-            genre=[record.genre for record in META],
-            title=[record.title for record in META])
+        expand(rules.basic_stats.output, zip, genre=genres, title=titles)
     
     output:
         f'{output_path}/basic_stats.tsv'
