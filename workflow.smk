@@ -58,16 +58,16 @@ rule merge_basic_stats:
     shell:
         '''
         read -a files <<< "{input}"
-        echo -n "genre\ttitle\t" > {output}
-        head -n 1 ${{files[0]}} >> {output}
+        echo -n "genre\ttitle\t" > "{output}"
+        head -n 1 ${{files[0]}} >> "{output}"
         for file in "${{files[@]}}"
         do
             base=$(basename $file)
-            title=${{base%_stats.tsv}}
+            title=${{base%%_*}}
             genre=$(basename $(dirname $file))
             echo -n "$genre\t$title\t"
             tail -n +2 $file
-        done | sort >> {output}
+        done | sort >> "{output}"
         '''
 
 rule jsd_divergence:
