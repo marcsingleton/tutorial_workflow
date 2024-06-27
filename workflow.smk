@@ -96,11 +96,14 @@ rule merge_jsd_divergence:
     shell:
         '''
         read -a files <<< "{input}"
+        echo "genre1\ttitle1\tgenre2\ttitle2\tjsd" > "{output}"
         for file in "${{files[@]}}"
         do
-            cat $file
-            echo
-        done > {output}
+            base=$(basename $file)
+            meta=${{base%%.*}}
+            jsd=$(cat $file)
+            echo "$meta\t$jsd" | tr "|" "\t"
+        done | sort >> "{output}"
         '''
 
 rule all:
