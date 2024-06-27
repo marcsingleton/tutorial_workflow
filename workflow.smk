@@ -106,9 +106,21 @@ rule merge_jsd_divergence:
         done | sort >> "{output}"
         '''
 
+rule group_jsd_stats:
+    input:
+        rules.merge_jsd_divergence.output
+    
+    output:
+        f'{output_path}/grouped_jsd.txt'
+    
+    shell:
+        f'''
+        python {code_path}/group_jsd_stats.py {{input}} {{output}}
+        '''
+
 rule all:
     default_target: True
 
     input:
         rules.merge_basic_stats.output,
-        rules.merge_jsd_divergence.output
+        rules.group_jsd_stats.output
