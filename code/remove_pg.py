@@ -12,7 +12,7 @@ def get_text_lines(path):
                 in_text = True
                 continue  # Skip current line so it's not yielded
             if line.startswith('*** END OF THE PROJECT GUTENBERG EBOOK'):
-                in_text = False
+                return
             if in_text:
                 yield line
 
