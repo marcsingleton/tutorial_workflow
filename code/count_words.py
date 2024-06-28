@@ -4,7 +4,6 @@ import os
 import re
 from argparse import ArgumentParser
 from collections import Counter
-from operator import itemgetter
 from string import punctuation
 
 
@@ -30,7 +29,7 @@ if __name__ == '__main__':
     with open(args.input_path) as file:
         for line in file:
             words = [process_word(word) for word in process_line(line)]
-            words = [word for word in words if word]
+            words = [word for word in words if word]  # Remove empty words
             count.update(words)
 
     output_dir = os.path.dirname(args.output_path)
@@ -39,5 +38,5 @@ if __name__ == '__main__':
     
     with open(args.output_path, 'w') as file:
         file.write('word\tcount\n')
-        for word, count in sorted(count.items(), key=itemgetter(1), reverse=True):
+        for word, count in sorted(count.items(), key=lambda x: (x[1], x[0]), reverse=True):
             file.write(f'{word}\t{count}\n')
