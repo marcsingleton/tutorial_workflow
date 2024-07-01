@@ -25,16 +25,16 @@ if __name__ == '__main__':
     counts2 = read_counts(args.input_path_2)
 
     vocab = set(counts1) | set(counts2)
-    pseudo_count = 1 / len(vocab)  # Use 1 pseudo-count uniform across all words
-    n1 = sum(counts1.values()) + 1
-    n2 = sum(counts2.values()) + 1
+    n1 = sum(counts1.values())
+    n2 = sum(counts2.values())
 
     JSD = 0
     for word in vocab:
-        p1 = (counts1.get(word, 0) + pseudo_count) / n1
-        p2 = (counts2.get(word, 0) + pseudo_count) / n2
-        JSD += p1 * log(p1 / p2)  # p1 as reference
-        JSD += p2 * log(p2 / p1)  # p2 as reference
+        p1 = counts1.get(word, 0) / n1
+        p2 = counts2.get(word, 0) / n2
+        m = 0.5 * (p1 + p2)
+        JSD += p1 * log(p1 / m)  # p1 as reference
+        JSD += p2 * log(p2 / m)  # p2 as reference
     JSD /= 2
 
     print(JSD, end='')
