@@ -28,13 +28,13 @@ if __name__ == '__main__':
     n1 = sum(counts1.values())
     n2 = sum(counts2.values())
 
-    JSD = 0
+    jsd = 0
     for word in vocab:
         p1 = counts1.get(word, 0) / n1
         p2 = counts2.get(word, 0) / n2
         m = 0.5 * (p1 + p2)
-        JSD += p1 * log(p1 / m)  # p1 as reference
-        JSD += p2 * log(p2 / m)  # p2 as reference
-    JSD /= 2
+        jsd += p1 * log(p1 / m)  # p1 as reference
+        jsd += p2 * log(p2 / m)  # p2 as reference
+    jsd /= 2
 
-    print(JSD, end='')
+    print(jsd, end='')
