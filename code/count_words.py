@@ -8,7 +8,7 @@ from string import punctuation
 
 
 def process_line(line):
-    words = re.split('[\s]+|—|--', line)  # Whitespace, em dash, and double hyphens
+    words = re.split(r'[\s]+|—|--', line)  # Whitespace, em dash, and double hyphens
     return words
 
 
