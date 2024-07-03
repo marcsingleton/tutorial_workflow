@@ -9,7 +9,7 @@ The pipeline's major components are largely written in Python and use SciPy and 
 To run the Nextflow workflow, use:
 
 ```
-nextflow run workflow.nf
+NXF_CONDA_ENABLED=true nextflow run workflow.nf
 ```
 
 To run the Snakemake workflow, use:
