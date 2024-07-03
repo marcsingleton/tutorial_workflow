@@ -15,5 +15,5 @@ nextflow run workflow.nf
 To run the Snakemake workflow, use:
 
 ```
-snakemake -c 1 -s workflow.smk
+snakemake --use-conda --conda-frontend conda -c 1 -s workflow.smk
 ```
