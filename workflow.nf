@@ -4,6 +4,7 @@
 params.output_path = "$projectDir/results_nf/"
 params.data_path = "$projectDir/data/"
 params.code_path = "$projectDir/code/"
+params.env_path = "$projectDir/env.yaml"
 
 process remove_pg {
     publishDir "$params.output_path/"
@@ -37,6 +38,7 @@ process count_words {
 
 process basic_stats {
     publishDir "$params.output_path/"
+    conda params.env_path
 
     input:
     tuple val(meta), path(input_path)
@@ -85,6 +87,7 @@ process jsd_divergence {
 
 process group_jsd_stats {
     publishDir "$params.output_path/"
+    conda params.env_path
 
     input:
     path input_path
