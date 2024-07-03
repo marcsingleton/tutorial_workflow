@@ -7,6 +7,7 @@ from itertools import combinations_with_replacement
 output_path = 'results_smk'
 data_path = 'data'
 code_path = 'code'
+env_path = 'env.yaml'
 
 # Collect metadata
 GENRES, TITLES = glob_wildcards(f'{data_path}/{{genre}}/{{title}}.txt')
@@ -37,6 +38,8 @@ rule basic_stats:
         rules.count_words.output
     output:
         f'{output_path}/{{genre}}/{{title}}_stats.tsv'
+    conda:
+        env_path
     shell:
         f'''
         python {code_path}/basic_stats.py {{input}} {{output}}
@@ -99,6 +102,8 @@ rule group_jsd_stats:
         rules.merge_jsd_divergence.output
     output:
         f'{output_path}/grouped_jsd.txt'
+    conda:
+        env_path
     shell:
         f'''
         python {code_path}/group_jsd_stats.py {{input}} {{output}}
