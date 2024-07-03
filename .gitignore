@@ -6,6 +6,7 @@ work/
 # Snakemake internal folders
 .snakemake/
 
-data/
 results_nf/
 results_smk/
+
+.DS_Store
