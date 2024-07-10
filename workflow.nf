@@ -4,13 +4,13 @@
 params.output_path = "$projectDir/results_nf/"
 params.data_path = "$projectDir/data/"
 params.code_path = "$projectDir/code/"
-params.env_path = "$projectDir/env.yaml"
+params.env_path = "$projectDir/env.yml"
 
 process remove_pg {
     publishDir "$params.output_path/"
 
     input:
-    tuple val(meta), val(input_path)
+    tuple val(meta), path(input_path)
     
     output:
     tuple val(meta), path("${meta.genre}/${meta.title}_clean.txt")

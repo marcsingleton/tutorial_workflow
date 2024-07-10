@@ -7,7 +7,7 @@ from itertools import combinations_with_replacement
 output_path = 'results_smk'
 data_path = 'data'
 code_path = 'code'
-env_path = 'env.yaml'
+env_path = 'env.yml'
 
 # Collect metadata
 GENRES, TITLES = glob_wildcards(f'{data_path}/{{genre}}/{{title}}.txt')
