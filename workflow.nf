@@ -105,7 +105,9 @@ process group_jsd_stats {
 workflow {
     // Find paths to data and convert into tuples with metadata
     file_paths = channel.fromPath("$params.data_path/*/*.txt")
-    file_records = file_paths.map({tuple([title: it.baseName, genre: it.parent.baseName], it)})
+    file_records = file_paths.map({
+        tuple([title: it.baseName,genre: it.parent.baseName], it)
+        })
     
     // Remove header and footer
     clean_records = remove_pg(file_records)
