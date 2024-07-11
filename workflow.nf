@@ -59,10 +59,10 @@ process paste_ids {
     output:
     stdout
 
-    shell:
-    '''
-    echo -n 'genre\ttitle\n!{meta.genre}\t!{meta.title}\n' | paste - !{input_path}
-    '''
+    script:
+    """
+    echo -n 'genre\ttitle\n${meta.genre}\t${meta.title}\n' | paste - ${input_path}
+    """
 }
 
 process jsd_divergence {
