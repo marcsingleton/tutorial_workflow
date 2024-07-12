@@ -1,6 +1,5 @@
 """Snakemake pipeline for book text analysis."""
 
-import os
 from itertools import combinations_with_replacement
 
 # Paths
