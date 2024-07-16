@@ -46,7 +46,8 @@ rule basic_stats:
 
 rule merge_basic_stats:
     input:
-        expand(rules.basic_stats.output, zip, genre=GENRES, title=TITLES)
+        expand(rules.basic_stats.output, zip,
+               genre=GENRES, title=TITLES)
     output:
         f'{output_path}/basic_stats.tsv'
     shell:
@@ -80,7 +81,9 @@ GENRES1, TITLES1 = zip(*META1)
 GENRES2, TITLES2 = zip(*META2)
 rule merge_jsd_divergence:
     input:
-        expand(rules.jsd_divergence.output, zip, genre1=GENRES1, title1=TITLES1, genre2=GENRES2, title2=TITLES2)
+        expand(rules.jsd_divergence.output, zip,
+               genre1=GENRES1, title1=TITLES1,
+               genre2=GENRES2, title2=TITLES2)
     output:
         f'{output_path}/jsd_divergence.tsv'
     shell:
