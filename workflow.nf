@@ -69,7 +69,7 @@ process jsd_divergence {
     input:
     tuple(
         val(meta),
-        path(input_path_1, stageAs: "counts1.tsv"),
+        path(input_path_1, stageAs: "counts1.tsv"), // Necessary to prevent name collision for self comparisons
         path(input_path_2, stageAs: "counts2.tsv")
     )
 
@@ -126,7 +126,7 @@ workflow {
             meta1 = it[0].collectEntries((key, value) -> [key + '1', value])
             meta2 = it[2].collectEntries((key, value) -> [key + '2', value])
             meta = meta1 + meta2
-            tuple(meta, it[1], it[3])
+            tuple(meta, it[1], it[3]) // Last line of a closure is its return value
             })
         .unique({[it[0].title1, it[0].title2].sort()})
     jsd_records = jsd_divergence(count_pairs)

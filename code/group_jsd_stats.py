@@ -16,7 +16,7 @@ if __name__ == '__main__':
     df = pd.read_table(args.input_path)
     
     df['intra'] = df['genre1'] == df['genre2']
-    intra = df.loc[df['intra'] & (df['title1'] != df['title2']), 'jsd']
+    intra = df.loc[df['intra'] & (df['title1'] != df['title2']), 'jsd']  # Exclude self comparisons
     inter = df.loc[~df['intra'], 'jsd']
     result = mannwhitneyu(intra, inter)
 
