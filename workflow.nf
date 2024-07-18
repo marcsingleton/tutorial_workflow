@@ -132,11 +132,11 @@ workflow {
     jsd_records = jsd_divergence(count_pairs)
     jsd_merged = jsd_records
         .map({
-            record = it[0].clone()  // Copy meta object to not modify
-            record['jsd'] = it[1]
+            data = it[0].clone()  // Copy meta object to not modify
+            data['jsd'] = it[1]
             keys = ['genre1', 'title1', 'genre2', 'title2', 'jsd']
             header = keys.join('\t') + '\n'
-            values = keys.collect({record[it]}).join('\t') + '\n'
+            values = keys.collect({data[it]}).join('\t') + '\n'
             header + values
             })
         .collectFile(name: "$params.output_path/jsd_divergence.tsv",
